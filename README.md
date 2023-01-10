@@ -6,6 +6,10 @@
 
 Go Iteration tools with a rusty flavour
 
+## Requirements
+
+- Go 1.18+
+
 ## Motivation
 
 1. I missed some of the iteration style tools in Rust.
