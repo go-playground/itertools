@@ -1,0 +1,36 @@
+package itertools
+
+import (
+	optionext "github.com/go-playground/pkg/v5/values/option"
+)
+
+// Map creates a new iterator for transformation of types.
+func Map[T, V any](iterator Iterator[T], fn MapFn[T, V]) *MapIterator[T, V] {
+	return &MapIterator[T, V]{
+		iterator: iterator,
+		fn:       fn,
+	}
+}
+
+// MapFn represents the MapIterator transformation function.
+type MapFn[T, V any] func(v T) V
+
+// MapIterator is used to transform elements from one type to another.
+type MapIterator[T, V any] struct {
+	iterator Iterator[T]
+	fn       MapFn[T, V]
+}
+
+// Next returns the next transformed element or None if at the end of the iterator.
+func (i *MapIterator[T, V]) Next() optionext.Option[V] {
+	v := i.iterator.Next()
+	if v.IsNone() {
+		return optionext.None[V]()
+	}
+	return optionext.Some(i.fn(v.Unwrap()))
+}
+
+// Iter is a convenience function that converts the map iterator into an `*Iterate[T]`.
+func (i *MapIterator[T, V]) Iter() *Iterate[V] {
+	return Iter[V](i)
+}
