@@ -4,33 +4,52 @@ import (
 	optionext "github.com/go-playground/pkg/v5/values/option"
 )
 
-// Map creates a new iterator for transformation of types.
-func Map[T, V any](iterator Iterator[T], fn MapFn[T, V]) *MapIterator[T, V] {
-	return &MapIterator[T, V]{
-		iterator: iterator,
-		fn:       fn,
+// Entry represents a single Map entry.
+type Entry[K comparable, V any] struct {
+	Key   K
+	Value V
+}
+
+// MapIter creates a new iterator for transformation of types.
+func MapIter[K comparable, V any](m map[K]V) *mapIterator[K, V] {
+	return &mapIterator[K, V]{
+		m: m,
 	}
 }
 
-// MapFn represents the MapIterator transformation function.
-type MapFn[T, V any] func(v T) V
-
-// MapIterator is used to transform elements from one type to another.
-type MapIterator[T, V any] struct {
-	iterator Iterator[T]
-	fn       MapFn[T, V]
+// mapIterator is used to transform elements from one type to another.
+type mapIterator[K comparable, V any] struct {
+	m map[K]V
 }
 
 // Next returns the next transformed element or None if at the end of the iterator.
-func (i *MapIterator[T, V]) Next() optionext.Option[V] {
-	v := i.iterator.Next()
-	if v.IsNone() {
-		return optionext.None[V]()
+//
+// Warning: This consumes(removes) the map entries as it iterates.
+func (i *mapIterator[K, V]) Next() optionext.Option[Entry[K, V]] {
+	for k, v := range i.m {
+		delete(i.m, k)
+		return optionext.Some(Entry[K, V]{
+			Key:   k,
+			Value: v,
+		})
 	}
-	return optionext.Some(i.fn(v.Unwrap()))
+	return optionext.None[Entry[K, V]]()
 }
 
 // Iter is a convenience function that converts the map iterator into an `*Iterate[T]`.
-func (i *MapIterator[T, V]) Iter() *Iterate[V] {
-	return Iter[V](i)
+func (i *mapIterator[K, V]) Iter() *Iterate[Entry[K, V], struct{}] {
+	return IterMap[Entry[K, V], struct{}](i)
 }
+
+// Retain retains only the elements specified by the function and removes others.
+func (i *mapIterator[K, V]) Retain(fn func(k K, v V) bool) *mapIterator[K, V] {
+	for k, v := range i.m {
+		if fn(k, v) {
+			continue
+		}
+		delete(i.m, k)
+	}
+	return i
+}
+
+// TODO: Add Len function
