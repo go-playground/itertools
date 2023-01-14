@@ -88,34 +88,39 @@ func assertEqual[T comparable](t *testing.T, l, r T) {
 	}
 }
 
+func stdRetain(s []int) []int {
+	var j int
+	for _, v := range s {
+		if v == 1 {
+			s[j] = v
+			j++
+		}
+	}
+	return s[:j]
+}
+
+func stdRetainFn(s []int, fn func(v int) bool) []int {
+	var j int
+	for _, v := range s {
+		if fn(v) {
+			s[j] = v
+			j++
+		}
+	}
+	return s[:j]
+}
+
 func BenchmarkSTDRetain(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		s := makeSlice()
-		var j int
-		for _, v := range s {
-			if v == 1 {
-				s[j] = v
-				j++
-			}
-		}
-		s = s[:j]
+		stdRetain(makeSlice())
 	}
 }
 
 func BenchmarkSTDFnRetain(b *testing.B) {
-	fn := func(v int) bool {
-		return v == 1
-	}
 	for i := 0; i < b.N; i++ {
-		s := makeSlice()
-		var j int
-		for _, v := range s {
-			if fn(v) {
-				s[j] = v
-				j++
-			}
-		}
-		s = s[:j]
+		stdRetainFn(makeSlice(), func(v int) bool {
+			return v == 1
+		})
 	}
 }
 
