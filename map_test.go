@@ -6,8 +6,13 @@ import (
 )
 
 func TestMap(t *testing.T) {
+
+	// Test Misc
+	iter := WrapMap(makeMap())
+	assertEqual(t, iter.Len(), 5)
+
 	// Test Next
-	iter := MapIter(makeMap())
+	iter = WrapMap(makeMap())
 	assertEqual(t, iter.Next().IsSome(), true)
 	assertEqual(t, iter.Next().IsSome(), true)
 	assertEqual(t, iter.Next().IsSome(), true)
@@ -16,11 +21,25 @@ func TestMap(t *testing.T) {
 	assertEqual(t, iter.Next().IsSome(), false)
 
 	// Test Retain
-	iter = MapIter(makeMap()).Retain(func(k string, v int) bool {
+	iter = WrapMap(makeMap()).Retain(func(k string, v int) bool {
 		return v == 3
 	})
 	assertEqual(t, iter.Next(), optionext.Some(Entry[string, int]{Key: "3", Value: 3}))
 	assertEqual(t, iter.Next(), optionext.None[Entry[string, int]]())
+
+	// Test Iter Filter
+	iter2 := WrapMap(makeMap()).Iter().Filter(func(v Entry[string, int]) bool {
+		return v.Value != 3
+	})
+	assertEqual(t, iter2.Next(), optionext.Some(Entry[string, int]{Key: "3", Value: 3}))
+	assertEqual(t, iter2.Next(), optionext.None[Entry[string, int]]())
+
+	// Test IterPar Filter
+	iter2 = WrapMap(makeMap()).IterPar().Filter(func(v Entry[string, int]) bool {
+		return v.Value != 3
+	})
+	assertEqual(t, iter2.Next(), optionext.Some(Entry[string, int]{Key: "3", Value: 3}))
+	assertEqual(t, iter2.Next(), optionext.None[Entry[string, int]]())
 }
 
 func makeMap() map[string]int {

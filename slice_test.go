@@ -8,14 +8,14 @@ import (
 func TestSlice(t *testing.T) {
 	slice := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-	// Test Slice, Len, Cap
-	iter := SliceIter(slice)
+	// Test WrapSlice, Len, Cap
+	iter := WrapSlice(slice)
 	assertEqual(t, iter.Len(), 10)
 	assertEqual(t, iter.Cap(), 10)
 	assertEqual(t, len(iter.Slice()), 10)
 
 	// Test Next
-	iter = SliceIter(slice)
+	iter = WrapSlice(slice)
 	assertEqual(t, iter.Next(), optionext.Some(0))
 	assertEqual(t, iter.Next(), optionext.Some(1))
 	assertEqual(t, iter.Next(), optionext.Some(2))
@@ -29,7 +29,7 @@ func TestSlice(t *testing.T) {
 	assertEqual(t, iter.Next(), optionext.None[int]())
 
 	// Test sort
-	iter = SliceIter(slice).Sort(func(i int, j int) bool {
+	iter = WrapSlice(slice).Sort(func(i int, j int) bool {
 		return i > j
 	})
 	assertEqual(t, iter.Next(), optionext.Some(9))
@@ -45,7 +45,7 @@ func TestSlice(t *testing.T) {
 	assertEqual(t, iter.Next(), optionext.None[int]())
 
 	// Test sort stable
-	iter = SliceIter(slice).SortStable(func(i int, j int) bool {
+	iter = WrapSlice(slice).SortStable(func(i int, j int) bool {
 		return i > j
 	})
 	assertEqual(t, iter.Next(), optionext.Some(9))
@@ -61,14 +61,21 @@ func TestSlice(t *testing.T) {
 	assertEqual(t, iter.Next(), optionext.None[int]())
 
 	// Test Iter Filter
-	iter = SliceIter(slice).Iter().Filter(func(v int) bool {
+	iter = WrapSlice(slice).Iter().Filter(func(v int) bool {
+		return v < 9
+	}).CollectIter()
+	assertEqual(t, iter.Next(), optionext.Some(9))
+	assertEqual(t, iter.Next(), optionext.None[int]())
+
+	// Test IterPar Filter
+	iter = WrapSlice(slice).IterPar().Filter(func(v int) bool {
 		return v < 9
 	}).CollectIter()
 	assertEqual(t, iter.Next(), optionext.Some(9))
 	assertEqual(t, iter.Next(), optionext.None[int]())
 
 	// Test Retain
-	iter = SliceIter(slice).Retain(func(v int) bool {
+	iter = WrapSlice(slice).Retain(func(v int) bool {
 		return v == 3
 	})
 	assertEqual(t, iter.Next(), optionext.Some(3))

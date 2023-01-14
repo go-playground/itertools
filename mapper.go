@@ -12,10 +12,10 @@ func Map[T, V any](iterator Iterator[T], fn MapFn[T, V]) *mapper[T, V] {
 	}
 }
 
-// MapFn represents the mapIterator transformation function.
+// MapFn represents the mapWrapper transformation function.
 type MapFn[T, V any] func(v T) V
 
-// mapIterator is used to transform elements from one type to another.
+// mapWrapper is used to transform elements from one type to another.
 type mapper[T, V any] struct {
 	iterator Iterator[T]
 	fn       MapFn[T, V]
@@ -33,4 +33,9 @@ func (i *mapper[T, V]) Next() optionext.Option[V] {
 // Iter is a convenience function that converts the map iterator into an `*Iterate[T]`.
 func (i *mapper[T, V]) Iter() *Iterate[V, struct{}] {
 	return Iter[V](i)
+}
+
+// IterPar is a convenience function that converts the map iterator into a parallel `*Iterate[T]`.
+func (i *mapper[T, V]) IterPar() *Iterate[V, struct{}] {
+	return IterPar[V](i)
 }

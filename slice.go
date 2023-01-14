@@ -3,30 +3,37 @@ package itertools
 import (
 	optionext "github.com/go-playground/pkg/v5/values/option"
 	"sort"
+	"sync"
 )
 
-// SliceIter accepts and turns a slice into an iterator.
+// WrapSlice accepts and turns a sliceWrapper into an iterator.
 //
-// This default the Map type to struct{} when none is required. See SliceIterMap if one is needed.
-func SliceIter[T any](slice []T) *sliceIterator[T, struct{}] {
-	return &sliceIterator[T, struct{}]{
+// The default the Map type to struct{} when none is required. See WrapSliceMap if one is needed.
+func WrapSlice[T any](slice []T) *sliceWrapper[T, struct{}] {
+	return &sliceWrapper[T, struct{}]{
 		slice: slice,
 	}
 }
 
-// SliceIterMap accepts and turns a slice into an iterator with a map type specified for Iter() to allow the Map helper
+// WrapSliceMap accepts and turns a sliceWrapper into an iterator with a map type specified for Iter() to allow the Map helper
 // function.
-func SliceIterMap[T, V any](slice []T) *sliceIterator[T, V] {
-	return &sliceIterator[T, V]{
+func WrapSliceMap[T, V any](slice []T) *sliceWrapper[T, V] {
+	return &sliceWrapper[T, V]{
 		slice: slice,
 	}
 }
 
-type sliceIterator[T, V any] struct {
-	slice []T
+type sliceWrapper[T, V any] struct {
+	slice    []T
+	m        sync.Mutex
+	parallel bool
 }
 
-func (i *sliceIterator[T, V]) Next() optionext.Option[T] {
+func (i *sliceWrapper[T, V]) Next() optionext.Option[T] {
+	if i.parallel {
+		i.m.Lock()
+		defer i.m.Unlock()
+	}
 	if len(i.slice) == 0 {
 		return optionext.None[T]()
 	}
@@ -35,43 +42,51 @@ func (i *sliceIterator[T, V]) Next() optionext.Option[T] {
 	return optionext.Some(v)
 }
 
-// Iter is a convenience function that converts the slice iterator into an `*Iterate[T]`.
-func (i *sliceIterator[T, V]) Iter() *Iterate[T, V] {
+// Iter is a convenience function that converts the sliceWrapper iterator into an `*Iterate[T]`.
+func (i *sliceWrapper[T, V]) Iter() *Iterate[T, V] {
 	return IterMap[T, V](i)
 }
 
-// Slice returns the underlying slice wrapped by the *sliceIterator.
-func (i *sliceIterator[T, V]) Slice() []T {
+// IterPar is a convenience function that converts the sliceWrapper iterator into a parallel `*Iterate[T]`.
+//
+// This causes the Next function to return elements protected by a Mutex.
+func (i *sliceWrapper[T, V]) IterPar() *Iterate[T, V] {
+	i.parallel = true
+	return IterMapPar[T, V](i)
+}
+
+// WrapSlice returns the underlying sliceWrapper wrapped by the *sliceWrapper.
+func (i *sliceWrapper[T, V]) Slice() []T {
 	return i.slice
 }
 
-// Len returns the length of the underlying slice.
-func (i *sliceIterator[T, V]) Len() int {
+// Len returns the length of the underlying sliceWrapper.
+func (i *sliceWrapper[T, V]) Len() int {
 	return len(i.slice)
 }
 
-// Cap returns the capacity of the underlying slice.
-func (i *sliceIterator[T, V]) Cap() int {
+// Cap returns the capacity of the underlying sliceWrapper.
+func (i *sliceWrapper[T, V]) Cap() int {
 	return cap(i.slice)
 }
 
-// Sort sorts the slice x given the provided less function.
+// Sort sorts the sliceWrapper x given the provided less function.
 //
 // The sort is not guaranteed to be stable: equal elements
 // may be reversed from their original order.
 // For a stable sort, use SortStable.
 //
 // `T` must be comparable.
-func (i *sliceIterator[T, V]) Sort(less func(i T, j T) bool) *sliceIterator[T, V] {
+func (i *sliceWrapper[T, V]) Sort(less func(i T, j T) bool) *sliceWrapper[T, V] {
 	sort.Slice(i.slice, func(j, k int) bool {
 		return less(i.slice[j], i.slice[k])
 	})
 	return i
 }
 
-// SortStable sorts the slice x using the provided less
+// SortStable sorts the sliceWrapper x using the provided less
 // function, keeping equal elements in their original order.
-func (i *sliceIterator[T, V]) SortStable(less func(i T, j T) bool) *sliceIterator[T, V] {
+func (i *sliceWrapper[T, V]) SortStable(less func(i T, j T) bool) *sliceWrapper[T, V] {
 	sort.SliceStable(i.slice, func(j, k int) bool {
 		return less(i.slice[j], i.slice[k])
 	})
@@ -80,8 +95,8 @@ func (i *sliceIterator[T, V]) SortStable(less func(i T, j T) bool) *sliceIterato
 
 // Retain retains only the elements specified by the function.
 //
-// This shuffles and resizes the underlying slice.
-func (i *sliceIterator[T, V]) Retain(fn func(v T) bool) *sliceIterator[T, V] {
+// This shuffles and resizes the underlying sliceWrapper.
+func (i *sliceWrapper[T, V]) Retain(fn func(v T) bool) *sliceWrapper[T, V] {
 	var j int
 	for _, v := range i.slice {
 		if fn(v) {

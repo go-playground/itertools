@@ -2,6 +2,7 @@ package itertools
 
 import (
 	optionext "github.com/go-playground/pkg/v5/values/option"
+	"sync"
 )
 
 // Entry represents a single Map entry.
@@ -10,24 +11,30 @@ type Entry[K comparable, V any] struct {
 	Value V
 }
 
-// MapIter creates a new iterator for transformation of types.
-func MapIter[K comparable, V any](m map[K]V) *mapIterator[K, V] {
-	return &mapIterator[K, V]{
-		m: m,
+// WrapMap creates a new iterator for transformation of types.
+func WrapMap[K comparable, V any](m map[K]V) *mapWrapper[K, V] {
+	return &mapWrapper[K, V]{
+		mp: m,
 	}
 }
 
-// mapIterator is used to transform elements from one type to another.
-type mapIterator[K comparable, V any] struct {
-	m map[K]V
+// mapWrapper is used to transform elements from one type to another.
+type mapWrapper[K comparable, V any] struct {
+	mp       map[K]V
+	m        sync.Mutex
+	parallel bool
 }
 
 // Next returns the next transformed element or None if at the end of the iterator.
 //
 // Warning: This consumes(removes) the map entries as it iterates.
-func (i *mapIterator[K, V]) Next() optionext.Option[Entry[K, V]] {
-	for k, v := range i.m {
-		delete(i.m, k)
+func (i *mapWrapper[K, V]) Next() optionext.Option[Entry[K, V]] {
+	if i.parallel {
+		i.m.Lock()
+		defer i.m.Unlock()
+	}
+	for k, v := range i.mp {
+		delete(i.mp, k)
 		return optionext.Some(Entry[K, V]{
 			Key:   k,
 			Value: v,
@@ -37,19 +44,30 @@ func (i *mapIterator[K, V]) Next() optionext.Option[Entry[K, V]] {
 }
 
 // Iter is a convenience function that converts the map iterator into an `*Iterate[T]`.
-func (i *mapIterator[K, V]) Iter() *Iterate[Entry[K, V], struct{}] {
+func (i *mapWrapper[K, V]) Iter() *Iterate[Entry[K, V], struct{}] {
 	return IterMap[Entry[K, V], struct{}](i)
 }
 
+// IterPar is a convenience function that converts the map iterator into a parallel `*Iterate[T]`.
+//
+// This causes the Next function to return elements protected by a Mutex.
+func (i *mapWrapper[K, V]) IterPar() *Iterate[Entry[K, V], struct{}] {
+	i.parallel = true
+	return IterMapPar[Entry[K, V], struct{}](i)
+}
+
 // Retain retains only the elements specified by the function and removes others.
-func (i *mapIterator[K, V]) Retain(fn func(k K, v V) bool) *mapIterator[K, V] {
-	for k, v := range i.m {
+func (i *mapWrapper[K, V]) Retain(fn func(k K, v V) bool) *mapWrapper[K, V] {
+	for k, v := range i.mp {
 		if fn(k, v) {
 			continue
 		}
-		delete(i.m, k)
+		delete(i.mp, k)
 	}
 	return i
 }
 
-// TODO: Add Len function
+// Len returns the underlying maps length.
+func (i *mapWrapper[K, V]) Len() int {
+	return len(i.mp)
+}
