@@ -87,3 +87,43 @@ func assertEqual[T comparable](t *testing.T, l, r T) {
 		t.Fatalf("expected `%#v` to equal `%#v`", l, r)
 	}
 }
+
+func BenchmarkSTDRetain(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		s := makeSlice()
+		var j int
+		for _, v := range s {
+			if v == 1 {
+				s[j] = v
+				j++
+			}
+		}
+		s = s[:j]
+	}
+}
+
+func BenchmarkSTDFnRetain(b *testing.B) {
+	fn := func(v int) bool {
+		return v == 1
+	}
+	for i := 0; i < b.N; i++ {
+		s := makeSlice()
+		var j int
+		for _, v := range s {
+			if fn(v) {
+				s[j] = v
+				j++
+			}
+		}
+		s = s[:j]
+	}
+}
+
+func BenchmarkSliceWrapper_Retain(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		WrapSlice(makeSlice())
+		//WrapSlice(makeSlice()).Retain(func(v int) bool {
+		//	return v == 1
+		//})
+	}
+}
