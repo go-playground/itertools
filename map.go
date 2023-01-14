@@ -21,17 +21,17 @@ func WrapMap[K comparable, V any](m map[K]V) *mapWrapper[K, V] {
 // mapWrapper is used to transform elements from one type to another.
 type mapWrapper[K comparable, V any] struct {
 	mp       map[K]V
-	m        sync.Mutex
-	parallel bool
+	parallel optionext.Option[*sync.Mutex]
 }
 
 // Next returns the next transformed element or None if at the end of the iterator.
 //
 // Warning: This consumes(removes) the map entries as it iterates.
 func (i *mapWrapper[K, V]) Next() optionext.Option[Entry[K, V]] {
-	if i.parallel {
-		i.m.Lock()
-		defer i.m.Unlock()
+	if i.parallel.IsSome() {
+		m := i.parallel.Unwrap()
+		m.Lock()
+		defer m.Unlock()
 	}
 	for k, v := range i.mp {
 		delete(i.mp, k)
@@ -52,7 +52,7 @@ func (i *mapWrapper[K, V]) Iter() *Iterate[Entry[K, V], struct{}] {
 //
 // This causes the Next function to return elements protected by a Mutex.
 func (i *mapWrapper[K, V]) IterPar() *Iterate[Entry[K, V], struct{}] {
-	i.parallel = true
+	i.parallel = optionext.Some(new(sync.Mutex))
 	return IterMapPar[Entry[K, V], struct{}](i)
 }
 

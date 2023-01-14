@@ -25,14 +25,14 @@ func WrapSliceMap[T, V any](slice []T) *sliceWrapper[T, V] {
 
 type sliceWrapper[T, V any] struct {
 	slice    []T
-	m        sync.Mutex
-	parallel bool
+	parallel optionext.Option[*sync.Mutex]
 }
 
 func (i *sliceWrapper[T, V]) Next() optionext.Option[T] {
-	if i.parallel {
-		i.m.Lock()
-		defer i.m.Unlock()
+	if i.parallel.IsSome() {
+		m := i.parallel.Unwrap()
+		m.Lock()
+		defer m.Unlock()
 	}
 	if len(i.slice) == 0 {
 		return optionext.None[T]()
@@ -51,11 +51,11 @@ func (i *sliceWrapper[T, V]) Iter() *Iterate[T, V] {
 //
 // This causes the Next function to return elements protected by a Mutex.
 func (i *sliceWrapper[T, V]) IterPar() *Iterate[T, V] {
-	i.parallel = true
+	i.parallel = optionext.Some(new(sync.Mutex))
 	return IterMapPar[T, V](i)
 }
 
-// WrapSlice returns the underlying sliceWrapper wrapped by the *sliceWrapper.
+// Slice returns the underlying sliceWrapper wrapped by the *sliceWrapper.
 func (i *sliceWrapper[T, V]) Slice() []T {
 	return i.slice
 }

@@ -121,9 +121,8 @@ func BenchmarkSTDFnRetain(b *testing.B) {
 
 func BenchmarkSliceWrapper_Retain(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		WrapSlice(makeSlice())
-		//WrapSlice(makeSlice()).Retain(func(v int) bool {
-		//	return v == 1
-		//})
+		WrapSlice(makeSlice()).Retain(func(v int) bool {
+			return v == 1
+		})
 	}
 }
