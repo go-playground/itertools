@@ -61,6 +61,13 @@ func TestSlice(t *testing.T) {
 	assertEqual(t, iter.Next(), optionext.None[int]())
 
 	// Test Iter Filter
+	iter = Filter(WrapSlice(slice).IntoIter(), func(v int) bool {
+		return v < 9
+	}).Iter().CollectIter()
+	assertEqual(t, iter.Next(), optionext.Some(9))
+	assertEqual(t, iter.Next(), optionext.None[int]())
+
+	// Test Iter Filter
 	iter = WrapSlice(slice).Iter().Filter(func(v int) bool {
 		return v < 9
 	}).CollectIter()

@@ -32,4 +32,9 @@ func TestChunk(t *testing.T) {
 	assertEqual(t, slice3[1], 9)
 
 	assertEqual(t, iter.Next().IsNone(), true)
+
+	chunker := Chunk[int, Iterator[int]](WrapSlice([]int{1, 2, 3}).IntoIter(), 2)
+	assertEqual(t, len(chunker.Next().Unwrap()), 2)
+	assertEqual(t, len(chunker.Next().Unwrap()), 1)
+	assertEqual(t, chunker.Next().IsNone(), true)
 }
