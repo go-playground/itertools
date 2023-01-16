@@ -33,13 +33,6 @@ func TestMap(t *testing.T) {
 	})
 	assertEqual(t, iter2.Next(), optionext.Some(Entry[string, int]{Key: "3", Value: 3}))
 	assertEqual(t, iter2.Next(), optionext.None[Entry[string, int]]())
-
-	// Test IterPar Filter
-	iter2 = WrapMap(makeMap()).IterPar().Filter(func(v Entry[string, int]) bool {
-		return v.Value != 3
-	})
-	assertEqual(t, iter2.Next(), optionext.Some(Entry[string, int]{Key: "3", Value: 3}))
-	assertEqual(t, iter2.Next(), optionext.None[Entry[string, int]]())
 }
 
 func makeMap() map[string]int {

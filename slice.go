@@ -3,19 +3,16 @@ package itertools
 import (
 	optionext "github.com/go-playground/pkg/v5/values/option"
 	"sort"
-	"sync"
 )
 
 // WrapSlice accepts and turns a sliceWrapper into an iterator.
 //
 // The default the Map type to struct{} when none is required. See WrapSliceMap if one is needed.
 func WrapSlice[T any](slice []T) *sliceWrapper[T, struct{}] {
-	return &sliceWrapper[T, struct{}]{
-		slice: slice,
-	}
+	return WrapSliceMap[T, struct{}](slice)
 }
 
-// WrapSliceMap accepts and turns a sliceWrapper into an iterator with a map type specified for Iter() to allow the Map helper
+// WrapSliceMap accepts and turns a sliceWrapper into an iterator with a map type specified for IterPar() to allow the Map helper
 // function.
 func WrapSliceMap[T, V any](slice []T) *sliceWrapper[T, V] {
 	return &sliceWrapper[T, V]{
@@ -24,16 +21,10 @@ func WrapSliceMap[T, V any](slice []T) *sliceWrapper[T, V] {
 }
 
 type sliceWrapper[T, V any] struct {
-	slice    []T
-	parallel optionext.Option[*sync.Mutex]
+	slice []T
 }
 
 func (i *sliceWrapper[T, V]) Next() optionext.Option[T] {
-	if i.parallel.IsSome() {
-		m := i.parallel.Unwrap()
-		m.Lock()
-		defer m.Unlock()
-	}
 	if len(i.slice) == 0 {
 		return optionext.None[T]()
 	}
@@ -45,14 +36,6 @@ func (i *sliceWrapper[T, V]) Next() optionext.Option[T] {
 // Iter is a convenience function that converts the sliceWrapper iterator into an `*Iterate[T]`.
 func (i *sliceWrapper[T, V]) Iter() *Iterate[T, V] {
 	return IterMap[T, V](i)
-}
-
-// IterPar is a convenience function that converts the sliceWrapper iterator into a parallel `*Iterate[T]`.
-//
-// This causes the Next function to return elements protected by a Mutex.
-func (i *sliceWrapper[T, V]) IterPar() *Iterate[T, V] {
-	i.parallel = optionext.Some(new(sync.Mutex))
-	return IterMapPar[T, V](i)
 }
 
 // Slice returns the underlying sliceWrapper wrapped by the *sliceWrapper.

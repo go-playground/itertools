@@ -34,8 +34,3 @@ func (i *mapper[T, V]) Next() optionext.Option[V] {
 func (i *mapper[T, V]) Iter() *Iterate[V, struct{}] {
 	return Iter[V](i)
 }
-
-// IterPar is a convenience function that converts the map iterator into a parallel `*Iterate[T]`.
-func (i *mapper[T, V]) IterPar() *Iterate[V, struct{}] {
-	return IterPar[V](i)
-}
