@@ -93,7 +93,7 @@ func (i Iterate[T, I, MAP]) StepBy(step int) Iterate[T, Iterator[T], MAP] {
 // Chunk returns a `*Iterate[T, V]` the returns an []T of the specified size
 //
 // The last slice is not guaranteed to be the exact chunk size when iterator finishes the remainder is returned.
-func (i Iterate[T, I, MAP]) Chunk(size int) Chunker[T, Iterator[T], MAP] {
+func (i Iterate[T, I, MAP]) Chunk(size int) chunker[T, Iterator[T], MAP] {
 	return ChunkWithMap[T, Iterator[T], MAP](i.iterator, size)
 }
 
