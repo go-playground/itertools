@@ -13,7 +13,7 @@ Go Iteration tools with a rusty flavour
 ## Motivation
 
 1. I missed some iteration style tools in Rust.
-2. Wanted to see how far I could push Go generics(turns out it very limited).
+2. Wanted to see how far I could push Go generics(turns out it is very limited).
 3. For fun.
 
 ## Example Usage (Simple)
