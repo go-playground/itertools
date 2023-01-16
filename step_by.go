@@ -4,19 +4,24 @@ import (
 	optionext "github.com/go-playground/pkg/v5/values/option"
 )
 
-// StepBy returns a `StepByIterator[T]` for use.
-func StepBy[T any](iterator Iterator[T], step int) *StepByIterator[T] {
-	return &StepByIterator[T]{
+// StepBy returns a `stepByIterator[T]` for use.
+func StepBy[T any](iterator Iterator[T], step int) *stepByIterator[T, struct{}] {
+	return StepByMap[T, struct{}](iterator, step)
+}
+
+// StepByMap returns a `stepByIterator[T]` for use and can specify a future `Map` type conversion.
+func StepByMap[T, MAP any](iterator Iterator[T], step int) *stepByIterator[T, MAP] {
+	return &stepByIterator[T, MAP]{
 		iterator: iterator,
 		step:     step,
 		first:    true,
 	}
 }
 
-// StepByIterator is an iterator starting at the same point, but stepping by the given amount at each iteration.
+// stepByIterator is an iterator starting at the same point, but stepping by the given amount at each iteration.
 //
 // The first element is always returned before the stepping begins.
-type StepByIterator[T any] struct {
+type stepByIterator[T, MAP any] struct {
 	iterator Iterator[T]
 	step     int
 	first    bool
@@ -24,7 +29,7 @@ type StepByIterator[T any] struct {
 
 // Next returns the next element advancing by the provided step or end of iterator and will ignore errors
 // returned from the elements being stepped over.
-func (i *StepByIterator[T]) Next() optionext.Option[T] {
+func (i *stepByIterator[T, MAP]) Next() optionext.Option[T] {
 	if i.first {
 		i.first = false
 		return i.iterator.Next()
@@ -37,4 +42,9 @@ func (i *StepByIterator[T]) Next() optionext.Option[T] {
 		}
 	}
 	return v
+}
+
+// Iter is a convenience function that converts the `stepByIterator` iterator into an `*Iterate[T]`.
+func (i *stepByIterator[T, MAP]) Iter() *Iterate[T, MAP] {
+	return IterMap[T, MAP](i)
 }
