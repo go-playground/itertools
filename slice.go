@@ -1,8 +1,8 @@
 package itertools
 
 import (
+	sliceext "github.com/go-playground/pkg/v5/slice"
 	optionext "github.com/go-playground/pkg/v5/values/option"
-	"sort"
 )
 
 // WrapSlice accepts and turns a sliceWrapper into an iterator.
@@ -62,22 +62,17 @@ func (i sliceWrapper[T, MAP]) Cap() int {
 //
 // The sort is not guaranteed to be stable: equal elements
 // may be reversed from their original order.
-// For a stable sort, use SortStable.
 //
-// `T` must be comparable.
+// For a stable sort, use SortStable.
 func (i sliceWrapper[T, MAP]) Sort(less func(i T, j T) bool) sliceWrapper[T, MAP] {
-	sort.Slice(i.slice, func(j, k int) bool {
-		return less(i.slice[j], i.slice[k])
-	})
+	sliceext.Sort(i.slice, less)
 	return WrapSliceMap[T, MAP](i.slice)
 }
 
 // SortStable sorts the sliceWrapper x using the provided less
 // function, keeping equal elements in their original order.
 func (i sliceWrapper[T, MAP]) SortStable(less func(i T, j T) bool) sliceWrapper[T, MAP] {
-	sort.SliceStable(i.slice, func(j, k int) bool {
-		return less(i.slice[j], i.slice[k])
-	})
+	sliceext.SortStable(i.slice, less)
 	return WrapSliceMap[T, MAP](i.slice)
 }
 
@@ -85,19 +80,17 @@ func (i sliceWrapper[T, MAP]) SortStable(less func(i T, j T) bool) sliceWrapper[
 //
 // This shuffles and returns the retained values of the slice.
 func (i sliceWrapper[T, MAP]) Retain(fn func(v T) bool) sliceWrapper[T, MAP] {
-	return WrapSliceMap[T, MAP](RetainSlice(i.slice, fn))
+	return WrapSliceMap[T, MAP](sliceext.Retain(i.slice, fn))
 }
 
-// RetainSlice retains only the elements specified by the function.
+// Filter filters out the elements specified by the function.
 //
 // This shuffles and returns the retained values of the slice.
-func RetainSlice[T any](slice []T, fn func(v T) bool) []T {
-	var j int
-	for _, v := range slice {
-		if fn(v) {
-			slice[j] = v
-			j++
-		}
-	}
-	return slice[:j]
+func (i sliceWrapper[T, MAP]) Filter(fn func(v T) bool) sliceWrapper[T, MAP] {
+	return WrapSliceMap[T, MAP](sliceext.Filter(i.slice, fn))
+}
+
+// Map maps a slice of []T -> MAP using the map function.
+func (i sliceWrapper[T, MAP]) Map(init MAP, fn func(accum MAP, v T) MAP) MAP {
+	return sliceext.Map[T, MAP](i.slice, init, fn)
 }

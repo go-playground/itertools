@@ -1,6 +1,7 @@
 package itertools
 
 import (
+	mapext "github.com/go-playground/pkg/v5/map"
 	optionext "github.com/go-playground/pkg/v5/values/option"
 )
 
@@ -47,22 +48,12 @@ func (i mapWrapper[K, V, MAP]) Iter() Iterate[Entry[K, V], mapWrapper[K, V, MAP]
 }
 
 // Retain retains only the elements specified by the function and removes others.
-func (i mapWrapper[K, V, MAP]) Retain(fn func(entry Entry[K, V]) bool) mapWrapper[K, V, MAP] {
-	RetainMap[K, V](i.m, fn)
+func (i mapWrapper[K, V, MAP]) Retain(fn func(key K, value V) bool) mapWrapper[K, V, MAP] {
+	mapext.Retain(i.m, fn)
 	return i
 }
 
 // Len returns the underlying map's length.
 func (i mapWrapper[K, V, MAP]) Len() int {
 	return len(i.m)
-}
-
-// RetainMap retains only the elements specified by the function and removes others.
-func RetainMap[K comparable, V any](m map[K]V, fn func(entry Entry[K, V]) (retain bool)) {
-	for k, v := range m {
-		if fn(Entry[K, V]{Key: k, Value: v}) {
-			continue
-		}
-		delete(m, k)
-	}
 }
