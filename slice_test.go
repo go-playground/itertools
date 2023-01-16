@@ -88,6 +88,30 @@ func TestSlice(t *testing.T) {
 	})
 	assertEqual(t, len(slice), 1)
 	assertEqual(t, slice[0], 2)
+
+	// Test sort
+	slice = []int{0, 1, 2, 3}
+	iterChain := WrapSlice(slice).Iter().Chain(WrapSlice(slice).IntoIter())
+	assertEqual(t, iterChain.Next(), optionext.Some(0))
+	assertEqual(t, iterChain.Next(), optionext.Some(1))
+	assertEqual(t, iterChain.Next(), optionext.Some(2))
+	assertEqual(t, iterChain.Next(), optionext.Some(3))
+	assertEqual(t, iterChain.Next(), optionext.Some(0))
+	assertEqual(t, iterChain.Next(), optionext.Some(1))
+	assertEqual(t, iterChain.Next(), optionext.Some(2))
+	assertEqual(t, iterChain.Next(), optionext.Some(3))
+	assertEqual(t, iterChain.Next(), optionext.None[int]())
+
+	iterChain = Chain[int](WrapSlice(slice).IntoIter(), WrapSlice(slice).IntoIter()).Iter()
+	assertEqual(t, iterChain.Next(), optionext.Some(0))
+	assertEqual(t, iterChain.Next(), optionext.Some(1))
+	assertEqual(t, iterChain.Next(), optionext.Some(2))
+	assertEqual(t, iterChain.Next(), optionext.Some(3))
+	assertEqual(t, iterChain.Next(), optionext.Some(0))
+	assertEqual(t, iterChain.Next(), optionext.Some(1))
+	assertEqual(t, iterChain.Next(), optionext.Some(2))
+	assertEqual(t, iterChain.Next(), optionext.Some(3))
+	assertEqual(t, iterChain.Next(), optionext.None[int]())
 }
 
 func assertEqual[T comparable](t *testing.T, l, r T) {
