@@ -21,9 +21,7 @@ type Iterator[T any] interface {
 //
 // It defaults the Map() function to struct{}. Use IterMap() if you wish to specify a type.
 func Iter[T any](iterator Iterator[T]) *Iterate[T, struct{}] {
-	return &Iterate[T, struct{}]{
-		iterator: iterator,
-	}
+	return IterMap[T, struct{}](iterator)
 }
 
 // IterMap creates a new iterator with helper functions.
