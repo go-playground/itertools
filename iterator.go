@@ -138,15 +138,15 @@ func (i Iterate[T, MAP]) Any(fn func(T) bool) (isAny bool) {
 // This will run in parallel. It is recommended to only use this when the overhead of running n parallel
 // is less than the work needing to be done.
 func (i Iterate[T, MAP]) AnyParallel(fn func(T) bool) (isAny bool) {
-	var b atomic.Bool
+	var k uint32 = 0
 	i.forEach(true, func(v T) (stop bool) {
 		match := fn(v)
 		if match {
-			b.Store(true)
+			atomic.StoreUint32(&k, 1)
 		}
 		return match
 	})
-	return b.Load()
+	return k == 1
 }
 
 // Position searches for an element in an iterator, returning its index.
