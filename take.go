@@ -6,11 +6,11 @@ import (
 
 // Take creates a new `takeIterator[T]` for use.
 func Take[T any](iterator Iterator[T], n int) *takeIterator[T, struct{}] {
-	return TakeMap[T, struct{}](iterator, n)
+	return TakeWithMap[T, struct{}](iterator, n)
 }
 
-// TakeMap creates a new `takeIterator[T]` for use and can specify a future `Map` type conversion.
-func TakeMap[T, MAP any](iterator Iterator[T], n int) *takeIterator[T, MAP] {
+// TakeWithMap creates a new `takeIterator[T]` for use and can specify a future `Map` type conversion.
+func TakeWithMap[T, MAP any](iterator Iterator[T], n int) *takeIterator[T, MAP] {
 	return &takeIterator[T, MAP]{
 		iterator: iterator,
 		limit:    n,

@@ -9,11 +9,11 @@ type FilterFn[T any] func(v T) bool
 
 // Filter creates a new `filterIterator`.
 func Filter[T, MAP any](iterator Iterator[T], fn FilterFn[T]) *filterIterator[T, struct{}] {
-	return FilterMap[T, struct{}](iterator, fn)
+	return FilterWithMap[T, struct{}](iterator, fn)
 }
 
-// FilterMap creates a new `filterIterator` for use which also specifies a potential future `Map` operation.
-func FilterMap[T, MAP any](iterator Iterator[T], fn FilterFn[T]) *filterIterator[T, MAP] {
+// FilterWithMap creates a new `filterIterator` for use which also specifies a potential future `Map` operation.
+func FilterWithMap[T, MAP any](iterator Iterator[T], fn FilterFn[T]) *filterIterator[T, MAP] {
 	return &filterIterator[T, MAP]{
 		iterator: iterator,
 		fn:       fn,

@@ -78,15 +78,22 @@ func (i *sliceWrapper[T, V]) SortStable(less func(i T, j T) bool) *sliceWrapper[
 
 // Retain retains only the elements specified by the function.
 //
-// This shuffles and resizes the underlying sliceWrapper.
+// This shuffles and returns the retained values of the slice.
 func (i *sliceWrapper[T, V]) Retain(fn func(v T) bool) *sliceWrapper[T, V] {
+	i.slice = RetainSlice(i.slice, fn)
+	return i
+}
+
+// RetainSlice retains only the elements specified by the function.
+//
+// This shuffles and returns the retained values of the slice.
+func RetainSlice[T any](slice []T, fn func(v T) bool) []T {
 	var j int
-	for _, v := range i.slice {
+	for _, v := range slice {
 		if fn(v) {
-			i.slice[j] = v
+			slice[j] = v
 			j++
 		}
 	}
-	i.slice = i.slice[:j]
-	return i
+	return slice[:j]
 }

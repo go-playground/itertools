@@ -71,8 +71,16 @@ func TestSlice(t *testing.T) {
 	iter = WrapSlice(slice).Retain(func(v int) bool {
 		return v == 3
 	})
+	assertEqual(t, iter.Len(), 1)
 	assertEqual(t, iter.Next(), optionext.Some(3))
 	assertEqual(t, iter.Next(), optionext.None[int]())
+
+	// Test Retain
+	slice = RetainSlice([]int{0, 1, 2, 3}, func(v int) bool {
+		return v == 2
+	})
+	assertEqual(t, len(slice), 1)
+	assertEqual(t, slice[0], 2)
 }
 
 func assertEqual[T comparable](t *testing.T, l, r T) {
@@ -120,6 +128,14 @@ func BenchmarkSTDFnRetain(b *testing.B) {
 func BenchmarkSliceWrapper_Retain(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		WrapSlice(makeSlice()).Retain(func(v int) bool {
+			return v == 1
+		})
+	}
+}
+
+func BenchmarkRetainSlice_Retain(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RetainSlice(makeSlice(), func(v int) bool {
 			return v == 1
 		})
 	}

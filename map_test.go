@@ -21,11 +21,19 @@ func TestMap(t *testing.T) {
 	assertEqual(t, iter.Next().IsSome(), false)
 
 	// Test Retain
-	iter = WrapMap(makeMap()).Retain(func(k string, v int) bool {
-		return v == 3
+	iter = WrapMap(makeMap()).Retain(func(entry Entry[string, int]) bool {
+		return entry.Value == 3
 	})
 	assertEqual(t, iter.Next(), optionext.Some(Entry[string, int]{Key: "3", Value: 3}))
 	assertEqual(t, iter.Next(), optionext.None[Entry[string, int]]())
+
+	// Test Retain Function
+	m := makeMap()
+	RetainMap(m, func(entry Entry[string, int]) bool {
+		return entry.Value == 3
+	})
+	assertEqual(t, len(m), 1)
+	assertEqual(t, m["3"], 3)
 
 	// Test Iter Filter
 	iter2 := WrapMap(makeMap()).Iter().Filter(func(v Entry[string, int]) bool {
@@ -42,5 +50,13 @@ func makeMap() map[string]int {
 		"3": 3,
 		"4": 4,
 		"5": 5,
+	}
+}
+
+func BenchmarkRetainMap_Retain(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		RetainMap(makeMap(), func(entry Entry[string, int]) (retain bool) {
+			return entry.Value == 3
+		})
 	}
 }

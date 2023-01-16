@@ -9,11 +9,11 @@ type TakeWhileFn[T any] func(v T) bool
 
 // TakeWhile creates a new `takeWhileIterator[T,I]` for use.
 func TakeWhile[T any](iterator Iterator[T], fn TakeWhileFn[T]) takeWhileIterator[T, struct{}] {
-	return TakeWhileMap[T, struct{}](iterator, fn)
+	return TakeWhileWithMap[T, struct{}](iterator, fn)
 }
 
-// TakeWhileMap creates a new `takeWhileIterator[T,I]` for use and can specify a future `Map` type conversion.
-func TakeWhileMap[T, MAP any](iterator Iterator[T], fn TakeWhileFn[T]) takeWhileIterator[T, MAP] {
+// TakeWhileWithMap creates a new `takeWhileIterator[T,I]` for use and can specify a future `Map` type conversion.
+func TakeWhileWithMap[T, MAP any](iterator Iterator[T], fn TakeWhileFn[T]) takeWhileIterator[T, MAP] {
 	return takeWhileIterator[T, MAP]{
 		iterator: iterator,
 		fn:       fn,

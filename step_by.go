@@ -6,11 +6,11 @@ import (
 
 // StepBy returns a `stepByIterator[T]` for use.
 func StepBy[T any](iterator Iterator[T], step int) *stepByIterator[T, struct{}] {
-	return StepByMap[T, struct{}](iterator, step)
+	return StepByWithMap[T, struct{}](iterator, step)
 }
 
-// StepByMap returns a `stepByIterator[T]` for use and can specify a future `Map` type conversion.
-func StepByMap[T, MAP any](iterator Iterator[T], step int) *stepByIterator[T, MAP] {
+// StepByWithMap returns a `stepByIterator[T]` for use and can specify a future `Map` type conversion.
+func StepByWithMap[T, MAP any](iterator Iterator[T], step int) *stepByIterator[T, MAP] {
 	return &stepByIterator[T, MAP]{
 		iterator: iterator,
 		step:     step,

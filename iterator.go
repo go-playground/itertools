@@ -56,7 +56,7 @@ func (i Iterate[T, MAP]) Map(fn MapFn[T, MAP]) mapper[T, MAP] {
 
 // Filter accepts a `FilterFn[T]` to filter items.
 func (i Iterate[T, MAP]) Filter(fn FilterFn[T]) Iterate[T, MAP] {
-	return IterMap[T, MAP](FilterMap[T, MAP](i.iterator, fn))
+	return IterMap[T, MAP](FilterWithMap[T, MAP](i.iterator, fn))
 }
 
 // Chain creates a new chainIterator for use.
@@ -85,7 +85,7 @@ func (i Iterate[T, MAP]) StepBy(step int) Iterate[T, MAP] {
 //
 // The last slice is not guaranteed to be the exact chunk size when iterator finishes the remainder is returned.
 func (i Iterate[T, MAP]) Chunk(size int) Chunker[T, MAP] {
-	return ChunkMap[T, MAP](i.iterator, size)
+	return ChunkWithMap[T, MAP](i.iterator, size)
 }
 
 // Find searches for the next element of an iterator that satisfies the function.
