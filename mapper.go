@@ -5,8 +5,8 @@ import (
 )
 
 // Map creates a new iterator for transformation of types.
-func Map[T, V any](iterator Iterator[T], fn MapFn[T, V]) *mapper[T, V] {
-	return &mapper[T, V]{
+func Map[T, V any](iterator Iterator[T], fn MapFn[T, V]) mapper[T, V] {
+	return mapper[T, V]{
 		iterator: iterator,
 		fn:       fn,
 	}
@@ -22,7 +22,7 @@ type mapper[T, V any] struct {
 }
 
 // Next returns the next transformed element or None if at the end of the iterator.
-func (i *mapper[T, V]) Next() optionext.Option[V] {
+func (i mapper[T, V]) Next() optionext.Option[V] {
 	v := i.iterator.Next()
 	if v.IsNone() {
 		return optionext.None[V]()
@@ -31,6 +31,6 @@ func (i *mapper[T, V]) Next() optionext.Option[V] {
 }
 
 // Iter is a convenience function that converts the map iterator into an `*Iterate[T]`.
-func (i *mapper[T, V]) Iter() *Iterate[V, struct{}] {
+func (i mapper[T, V]) Iter() Iterate[V, struct{}] {
 	return Iter[V](i)
 }

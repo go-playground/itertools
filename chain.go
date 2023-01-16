@@ -41,6 +41,6 @@ func (i *chainIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the chainIterator iterator into an `*Iterate[T]`.
-func (i *chainIterator[T, MAP]) Iter() *Iterate[T, MAP] {
+func (i *chainIterator[T, MAP]) Iter() Iterate[T, MAP] {
 	return IterMap[T, MAP](i)
 }

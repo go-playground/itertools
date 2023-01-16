@@ -5,13 +5,13 @@ import optionext "github.com/go-playground/pkg/v5/values/option"
 // Chunk creates a new `Chunker` for use.
 //
 // The default Map type is struct{}, see `ChunkMap` for details.
-func Chunk[T any](iterator Iterator[T], size int) *Chunker[T, struct{}] {
+func Chunk[T any](iterator Iterator[T], size int) Chunker[T, struct{}] {
 	return ChunkMap[T, struct{}](iterator, size)
 }
 
 // ChunkMap creates a new `Chunker` for use that accepts a Map type for use with `Iterate`.
-func ChunkMap[T, MAP any](iterator Iterator[T], size int) *Chunker[T, MAP] {
-	return &Chunker[T, MAP]{
+func ChunkMap[T, MAP any](iterator Iterator[T], size int) Chunker[T, MAP] {
+	return Chunker[T, MAP]{
 		iterator: iterator,
 		size:     size,
 	}
@@ -26,7 +26,7 @@ type Chunker[T, MAP any] struct {
 }
 
 // Next yields the next set of elements from the iterator.
-func (i *Chunker[T, MAP]) Next() optionext.Option[[]T] {
+func (i Chunker[T, MAP]) Next() optionext.Option[[]T] {
 	chunk := make([]T, 0, i.size)
 	for {
 		v := i.iterator.Next()

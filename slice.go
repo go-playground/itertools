@@ -34,7 +34,7 @@ func (i *sliceWrapper[T, V]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the sliceWrapper iterator into an `*Iterate[T]`.
-func (i *sliceWrapper[T, V]) Iter() *Iterate[T, V] {
+func (i *sliceWrapper[T, V]) Iter() Iterate[T, V] {
 	return IterMap[T, V](i)
 }
 

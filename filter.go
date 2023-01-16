@@ -37,6 +37,6 @@ func (i *filterIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the `filterIterator` iterator into an `*Iterate[T]`.
-func (i *filterIterator[T, MAP]) Iter() *Iterate[T, MAP] {
+func (i *filterIterator[T, MAP]) Iter() Iterate[T, MAP] {
 	return IterMap[T, MAP](i)
 }

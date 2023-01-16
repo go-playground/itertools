@@ -33,6 +33,6 @@ func (i *takeIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the `takeIterator` iterator into an `*Iterate[T]`.
-func (i *takeIterator[T, MAP]) Iter() *Iterate[T, MAP] {
+func (i *takeIterator[T, MAP]) Iter() Iterate[T, MAP] {
 	return IterMap[T, MAP](i)
 }

@@ -45,6 +45,6 @@ func (i *stepByIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the `stepByIterator` iterator into an `*Iterate[T]`.
-func (i *stepByIterator[T, MAP]) Iter() *Iterate[T, MAP] {
+func (i *stepByIterator[T, MAP]) Iter() Iterate[T, MAP] {
 	return IterMap[T, MAP](i)
 }
