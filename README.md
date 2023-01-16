@@ -8,7 +8,7 @@ Go Iteration tools with a rusty flavour
 
 ## Requirements
 
-- Go 1.18+
+- Go 1.19+
 
 ## Motivation
 
