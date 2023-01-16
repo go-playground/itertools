@@ -113,16 +113,15 @@ func (i Iterate[T, MAP]) All(fn func(T) bool) (isAll bool) {
 // This will run in parallel. It is recommended to only use this when the overhead of running n parallel
 // is less than the work needing to be done.
 func (i Iterate[T, MAP]) AllParallel(fn func(T) bool) (isAll bool) {
-	var b atomic.Bool
-	b.Store(true)
+	var k uint32 = 1
 	i.forEach(true, func(v T) (stop bool) {
 		if fn(v) {
 			return false
 		}
-		b.Store(false)
+		atomic.StoreUint32(&k, 0)
 		return true
 	})
-	return b.Load()
+	return k == 1
 }
 
 // Any returns true if any element matches the function return, false otherwise.
