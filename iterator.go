@@ -70,7 +70,7 @@ func (i Iterate[T, I, MAP]) Filter(fn FilterFn[T]) Iterate[T, Iterator[T], MAP] 
 
 // Chain creates a new chainIterator for use.
 func (i Iterate[T, I, MAP]) Chain(iterator Iterator[T]) Iterate[T, Iterator[T], MAP] {
-	return IterMap[T, Iterator[T], MAP](ChainWithMap[T, MAP](i.iterator, iterator))
+	return IterMap[T, Iterator[T], MAP](ChainWithMap[T, Iterator[T], Iterator[T], MAP](i.iterator, iterator))
 }
 
 // Take yields elements until n elements are yielded or the end of the iterator is reached (whichever happens first)
