@@ -5,26 +5,26 @@ import (
 )
 
 // Take creates a new `takeIterator[T]` for use.
-func Take[T any](iterator Iterator[T], n int) *takeIterator[T, struct{}] {
-	return TakeWithMap[T, struct{}](iterator, n)
+func Take[T any, I Iterator[T]](iterator I, n int) *takeIterator[T, I, struct{}] {
+	return TakeWithMap[T, I, struct{}](iterator, n)
 }
 
 // TakeWithMap creates a new `takeIterator[T]` for use and can specify a future `Map` type conversion.
-func TakeWithMap[T, MAP any](iterator Iterator[T], n int) *takeIterator[T, MAP] {
-	return &takeIterator[T, MAP]{
+func TakeWithMap[T any, I Iterator[T], MAP any](iterator I, n int) *takeIterator[T, I, MAP] {
+	return &takeIterator[T, I, MAP]{
 		iterator: iterator,
 		limit:    n,
 	}
 }
 
 // takeIterator is an iterator that only iterates over n elements.
-type takeIterator[T, MAP any] struct {
-	iterator Iterator[T]
+type takeIterator[T any, I Iterator[T], MAP any] struct {
+	iterator I
 	limit    int
 }
 
 // Next returns the next element until n is reached or end of the iterator.
-func (i *takeIterator[T, MAP]) Next() optionext.Option[T] {
+func (i *takeIterator[T, I, MAP]) Next() optionext.Option[T] {
 	if i.limit <= 0 {
 		return optionext.None[T]()
 	}
@@ -33,6 +33,6 @@ func (i *takeIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the `takeIterator` iterator into an `*Iterate[T]`.
-func (i *takeIterator[T, MAP]) Iter() Iterate[T, MAP] {
-	return IterMap[T, MAP](i)
+func (i *takeIterator[T, I, MAP]) Iter() Iterate[T, Iterator[T], MAP] {
+	return IterMap[T, Iterator[T], MAP](i)
 }

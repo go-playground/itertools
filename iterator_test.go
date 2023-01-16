@@ -48,59 +48,59 @@ func TestIterate(t *testing.T) {
 	assertEqual(t, iter3.Next(), optionext.None[int]())
 
 	// Test Find
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.Find(func(i int) bool {
+	iter4 := WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter4.Find(func(i int) bool {
 		return i == 1
 	}), optionext.Some(1))
 
 	// Test All
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.All(func(i int) bool {
+	iter5 := WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.All(func(i int) bool {
 		return i < 10
 	}), true)
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.All(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.All(func(i int) bool {
 		return i < 1
 	}), false)
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.AllParallel(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.AllParallel(func(i int) bool {
 		return i < 10
 	}), true)
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.AllParallel(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.AllParallel(func(i int) bool {
 		return i < 1
 	}), false)
 
 	// Test Any
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.Any(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.Any(func(i int) bool {
 		return i == 1
 	}), true)
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.Any(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.Any(func(i int) bool {
 		return i == 10
 	}), false)
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.AnyParallel(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.AnyParallel(func(i int) bool {
 		return i == 1
 	}), true)
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.AnyParallel(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.AnyParallel(func(i int) bool {
 		return i == 10
 	}), false)
 
 	// Test Position
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.Position(func(i int) bool {
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.Position(func(i int) bool {
 		return i == 1
 	}), optionext.Some(1))
 
 	// Test Count
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.Count(), 3)
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.Count(), 3)
 
-	iter3 = WrapSlice(makeSlice()).Iter()
-	assertEqual(t, iter3.CountParallel(), 3)
+	iter5 = WrapSlice(makeSlice()).Iter()
+	assertEqual(t, iter5.CountParallel(), 3)
 
 	// Test ForEach
 	var j int
@@ -116,27 +116,27 @@ func TestIterate(t *testing.T) {
 	assertEqual(t, k, int64(3))
 
 	// Test Chain
-	iter4 := WrapSlice(makeSlice()).Iter().Chain(WrapSlice(makeSlice()))
-	assertEqual(t, iter4.Next(), optionext.Some(0))
-	assertEqual(t, iter4.Next(), optionext.Some(1))
-	assertEqual(t, iter4.Next(), optionext.Some(2))
-	assertEqual(t, iter4.Next(), optionext.Some(0))
-	assertEqual(t, iter4.Next(), optionext.Some(1))
-	assertEqual(t, iter4.Next(), optionext.Some(2))
-	assertEqual(t, iter4.Next(), optionext.None[int]())
+	iter6 := WrapSlice(makeSlice()).Iter().Chain(WrapSlice(makeSlice()).IntoIter())
+	assertEqual(t, iter6.Next(), optionext.Some(0))
+	assertEqual(t, iter6.Next(), optionext.Some(1))
+	assertEqual(t, iter6.Next(), optionext.Some(2))
+	assertEqual(t, iter6.Next(), optionext.Some(0))
+	assertEqual(t, iter6.Next(), optionext.Some(1))
+	assertEqual(t, iter6.Next(), optionext.Some(2))
+	assertEqual(t, iter6.Next(), optionext.None[int]())
 
 	// Test Peekable
-	iter5 := WrapSlice(makeSlice()).Iter().Peekable()
-	assertEqual(t, iter5.Peek(), optionext.Some(0))
-	assertEqual(t, iter5.Next(), optionext.Some(0))
-	assertEqual(t, iter5.Peek(), optionext.Some(1))
-	assertEqual(t, iter5.Next(), optionext.Some(1))
-	assertEqual(t, iter5.Peek(), optionext.Some(2))
-	assertEqual(t, iter5.Next(), optionext.Some(2))
-	assertEqual(t, iter5.Peek(), optionext.None[int]())
-	assertEqual(t, iter5.Next(), optionext.None[int]())
+	iter7 := WrapSlice(makeSlice()).Iter().Peekable()
+	assertEqual(t, iter7.Peek(), optionext.Some(0))
+	assertEqual(t, iter7.Next(), optionext.Some(0))
+	assertEqual(t, iter7.Peek(), optionext.Some(1))
+	assertEqual(t, iter7.Next(), optionext.Some(1))
+	assertEqual(t, iter7.Peek(), optionext.Some(2))
+	assertEqual(t, iter7.Next(), optionext.Some(2))
+	assertEqual(t, iter7.Peek(), optionext.None[int]())
+	assertEqual(t, iter7.Next(), optionext.None[int]())
 
-	// Test Reduce
+	//	// Test Reduce
 	num := WrapSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}).Iter().Reduce(func(accum int, current int) int {
 		return accum + current
 	})

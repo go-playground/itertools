@@ -6,12 +6,12 @@ import (
 
 // Chain creates a new `chainIterator[T]` for use.
 func Chain[T any](first, second Iterator[T]) *chainIterator[T, struct{}] {
-	return ChainMap[T, struct{}](first, second)
+	return ChainWithMap[T, struct{}](first, second)
 }
 
-// ChainMap creates a new `chainIterator[T]` for use and parameter to specify a Map type for the `Iterate.Map` helper
+// ChainWithMap creates a new `chainIterator[T]` for use and parameter to specify a Map type for the `Iterate.Map` helper
 // function.
-func ChainMap[T, MAP any](first, second Iterator[T]) *chainIterator[T, MAP] {
+func ChainWithMap[T, MAP any](first, second Iterator[T]) *chainIterator[T, MAP] {
 	return &chainIterator[T, MAP]{
 		current: first,
 		next:    second,
@@ -41,6 +41,6 @@ func (i *chainIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the chainIterator iterator into an `*Iterate[T]`.
-func (i *chainIterator[T, MAP]) Iter() Iterate[T, MAP] {
-	return IterMap[T, MAP](i)
+func (i *chainIterator[T, MAP]) Iter() Iterate[T, Iterator[T], MAP] {
+	return IterMap[T, Iterator[T], MAP](i)
 }

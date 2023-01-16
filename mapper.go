@@ -5,32 +5,32 @@ import (
 )
 
 // Map creates a new iterator for transformation of types.
-func Map[T, V any](iterator Iterator[T], fn MapFn[T, V]) mapper[T, V] {
-	return mapper[T, V]{
+func Map[T any, I Iterator[T], MAP any](iterator I, fn MapFn[T, MAP]) mapper[T, I, MAP] {
+	return mapper[T, I, MAP]{
 		iterator: iterator,
 		fn:       fn,
 	}
 }
 
 // MapFn represents the mapWrapper transformation function.
-type MapFn[T, V any] func(v T) V
+type MapFn[T, MAP any] func(v T) MAP
 
 // mapWrapper is used to transform elements from one type to another.
-type mapper[T, V any] struct {
-	iterator Iterator[T]
-	fn       MapFn[T, V]
+type mapper[T any, I Iterator[T], MAP any] struct {
+	iterator I
+	fn       MapFn[T, MAP]
 }
 
 // Next returns the next transformed element or None if at the end of the iterator.
-func (i mapper[T, V]) Next() optionext.Option[V] {
+func (i mapper[T, I, MAP]) Next() optionext.Option[MAP] {
 	v := i.iterator.Next()
 	if v.IsNone() {
-		return optionext.None[V]()
+		return optionext.None[MAP]()
 	}
 	return optionext.Some(i.fn(v.Unwrap()))
 }
 
 // Iter is a convenience function that converts the map iterator into an `*Iterate[T]`.
-func (i mapper[T, V]) Iter() Iterate[V, struct{}] {
-	return Iter[V](i)
+func (i mapper[T, I, MAP]) Iter() Iterate[MAP, Iterator[MAP], struct{}] {
+	return Iter[MAP, Iterator[MAP]](i)
 }

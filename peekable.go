@@ -7,22 +7,22 @@ import (
 // Peekable accepts and `Iterator[T]` and turns it into a Peekable iterator.
 //
 // NOTE: Peekable iterators are commonly the LAST in a chain of iterators.
-func Peekable[T any](iterator Iterator[T]) *PeekableIterator[T] {
-	return &PeekableIterator[T]{
+func Peekable[T any, I Iterator[T]](iterator I) *peekableIterator[T, I] {
+	return &peekableIterator[T, I]{
 		iterator: iterator,
 	}
 }
 
-// PeekableIterator makes an `Iterator` peekable.
-type PeekableIterator[T any] struct {
-	iterator Iterator[T]
+// peekableIterator makes an `Iterator` peekable.
+type peekableIterator[T any, I Iterator[T]] struct {
+	iterator I
 	prev     optionext.Option[T]
 }
 
 // Next advances the iterator and returns the next value.
 //
 // Returns an Option with value of None when iteration has finished.
-func (i *PeekableIterator[T]) Next() optionext.Option[T] {
+func (i *peekableIterator[T, I]) Next() optionext.Option[T] {
 	if i.prev.IsSome() {
 		prev := i.prev
 		i.prev = optionext.None[T]()
@@ -32,7 +32,7 @@ func (i *PeekableIterator[T]) Next() optionext.Option[T] {
 }
 
 // Peek returns the next value without advancing the iterator.
-func (i *PeekableIterator[T]) Peek() optionext.Option[T] {
+func (i *peekableIterator[T, I]) Peek() optionext.Option[T] {
 	if i.prev.IsSome() {
 		return i.prev
 	}

@@ -5,13 +5,13 @@ import (
 )
 
 // StepBy returns a `stepByIterator[T]` for use.
-func StepBy[T any](iterator Iterator[T], step int) *stepByIterator[T, struct{}] {
-	return StepByWithMap[T, struct{}](iterator, step)
+func StepBy[T any, I Iterator[T]](iterator I, step int) *stepByIterator[T, I, struct{}] {
+	return StepByWithMap[T, I, struct{}](iterator, step)
 }
 
 // StepByWithMap returns a `stepByIterator[T]` for use and can specify a future `Map` type conversion.
-func StepByWithMap[T, MAP any](iterator Iterator[T], step int) *stepByIterator[T, MAP] {
-	return &stepByIterator[T, MAP]{
+func StepByWithMap[T any, I Iterator[T], MAP any](iterator I, step int) *stepByIterator[T, I, MAP] {
+	return &stepByIterator[T, I, MAP]{
 		iterator: iterator,
 		step:     step,
 		first:    true,
@@ -21,15 +21,15 @@ func StepByWithMap[T, MAP any](iterator Iterator[T], step int) *stepByIterator[T
 // stepByIterator is an iterator starting at the same point, but stepping by the given amount at each iteration.
 //
 // The first element is always returned before the stepping begins.
-type stepByIterator[T, MAP any] struct {
-	iterator Iterator[T]
+type stepByIterator[T any, I Iterator[T], MAP any] struct {
+	iterator I
 	step     int
 	first    bool
 }
 
 // Next returns the next element advancing by the provided step or end of iterator and will ignore errors
 // returned from the elements being stepped over.
-func (i *stepByIterator[T, MAP]) Next() optionext.Option[T] {
+func (i *stepByIterator[T, I, MAP]) Next() optionext.Option[T] {
 	if i.first {
 		i.first = false
 		return i.iterator.Next()
@@ -45,6 +45,6 @@ func (i *stepByIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the `stepByIterator` iterator into an `*Iterate[T]`.
-func (i *stepByIterator[T, MAP]) Iter() Iterate[T, MAP] {
-	return IterMap[T, MAP](i)
+func (i *stepByIterator[T, I, MAP]) Iter() Iterate[T, Iterator[T], MAP] {
+	return IterMap[T, Iterator[T], MAP](i)
 }

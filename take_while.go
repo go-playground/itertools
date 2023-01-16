@@ -8,13 +8,13 @@ import (
 type TakeWhileFn[T any] func(v T) bool
 
 // TakeWhile creates a new `takeWhileIterator[T,I]` for use.
-func TakeWhile[T any](iterator Iterator[T], fn TakeWhileFn[T]) takeWhileIterator[T, struct{}] {
-	return TakeWhileWithMap[T, struct{}](iterator, fn)
+func TakeWhile[T any, I Iterator[T]](iterator I, fn TakeWhileFn[T]) takeWhileIterator[T, I, struct{}] {
+	return TakeWhileWithMap[T, I, struct{}](iterator, fn)
 }
 
 // TakeWhileWithMap creates a new `takeWhileIterator[T,I]` for use and can specify a future `Map` type conversion.
-func TakeWhileWithMap[T, MAP any](iterator Iterator[T], fn TakeWhileFn[T]) takeWhileIterator[T, MAP] {
-	return takeWhileIterator[T, MAP]{
+func TakeWhileWithMap[T any, I Iterator[T], MAP any](iterator Iterator[T], fn TakeWhileFn[T]) takeWhileIterator[T, I, MAP] {
+	return takeWhileIterator[T, I, MAP]{
 		iterator: iterator,
 		fn:       fn,
 	}
@@ -22,13 +22,13 @@ func TakeWhileWithMap[T, MAP any](iterator Iterator[T], fn TakeWhileFn[T]) takeW
 
 // takeWhileIterator is an iterator that iterates over elements until the function return false or
 // end of the iterator (whichever happens first).
-type takeWhileIterator[T, MAP any] struct {
+type takeWhileIterator[T any, I Iterator[T], MAP any] struct {
 	iterator Iterator[T]
 	fn       TakeWhileFn[T]
 }
 
 // Next returns the next element until `TakeWhileFn[T]` returns false or end of the iterator.
-func (i takeWhileIterator[T, MAP]) Next() optionext.Option[T] {
+func (i takeWhileIterator[T, I, MAP]) Next() optionext.Option[T] {
 	for {
 		v := i.iterator.Next()
 		if v.IsNone() || i.fn(v.Unwrap()) {
@@ -38,6 +38,6 @@ func (i takeWhileIterator[T, MAP]) Next() optionext.Option[T] {
 }
 
 // Iter is a convenience function that converts the `takeWhileIterator` iterator into an `*Iterate[T]`.
-func (i takeWhileIterator[T, MAP]) Iter() Iterate[T, MAP] {
-	return IterMap[T, MAP](i)
+func (i takeWhileIterator[T, I, MAP]) Iter() Iterate[T, Iterator[T], MAP] {
+	return IterMap[T, Iterator[T], MAP](i)
 }
