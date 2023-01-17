@@ -93,7 +93,7 @@ func TestSlice(t *testing.T) {
 	Equal(t, iter.Next(), optionext.Some(3))
 	Equal(t, iter.Next(), optionext.None[int]())
 
-	// Test sort
+	// Test Iter sort
 	slice = []int{0, 1, 2, 3}
 	iterChain := WrapSlice(slice).Iter().Chain(WrapSlice(slice).IntoIter())
 	Equal(t, iterChain.Next(), optionext.Some(0))
@@ -106,16 +106,28 @@ func TestSlice(t *testing.T) {
 	Equal(t, iterChain.Next(), optionext.Some(3))
 	Equal(t, iterChain.Next(), optionext.None[int]())
 
-	iterChain = Chain[int](WrapSlice(slice).IntoIter(), WrapSlice(slice).IntoIter()).Iter()
-	Equal(t, iterChain.Next(), optionext.Some(0))
-	Equal(t, iterChain.Next(), optionext.Some(1))
-	Equal(t, iterChain.Next(), optionext.Some(2))
-	Equal(t, iterChain.Next(), optionext.Some(3))
-	Equal(t, iterChain.Next(), optionext.Some(0))
-	Equal(t, iterChain.Next(), optionext.Some(1))
-	Equal(t, iterChain.Next(), optionext.Some(2))
-	Equal(t, iterChain.Next(), optionext.Some(3))
-	Equal(t, iterChain.Next(), optionext.None[int]())
+	// Test Native sort
+	slice = []int{0, 1, 2, 3}
+	sorted := WrapSlice(slice).Sort(func(i int, j int) bool {
+		return i > j
+	})
+	Equal(t, sorted.Next(), optionext.Some(3))
+	Equal(t, sorted.Next(), optionext.Some(2))
+	Equal(t, sorted.Next(), optionext.Some(1))
+	Equal(t, sorted.Next(), optionext.Some(0))
+	Equal(t, sorted.Next(), optionext.None[int]())
+
+	slice = []int{0, 1, 2, 3}
+	iterChainWrap := Chain[int](WrapSlice(slice).IntoIter(), WrapSlice(slice).IntoIter()).Iter()
+	Equal(t, iterChainWrap.Next(), optionext.Some(0))
+	Equal(t, iterChainWrap.Next(), optionext.Some(1))
+	Equal(t, iterChainWrap.Next(), optionext.Some(2))
+	Equal(t, iterChainWrap.Next(), optionext.Some(3))
+	Equal(t, iterChainWrap.Next(), optionext.Some(0))
+	Equal(t, iterChainWrap.Next(), optionext.Some(1))
+	Equal(t, iterChainWrap.Next(), optionext.Some(2))
+	Equal(t, iterChainWrap.Next(), optionext.Some(3))
+	Equal(t, iterChainWrap.Next(), optionext.None[int]())
 
 	iterMap := WrapSliceMap[int, []string]([]int{0, 1, 2, 3}).Map(make([]string, 0, 4), func(accum []string, v int) []string {
 		return append(accum, strconv.Itoa(v))
